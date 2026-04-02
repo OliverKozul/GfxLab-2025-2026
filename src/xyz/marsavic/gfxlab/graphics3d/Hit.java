@@ -12,6 +12,9 @@ public interface Hit {
 	
 	/** The normal at the hit point. */
 	Vec3 n();
+
+	/** The tangent at the hit point. */
+	Vec3 tangent();
 	
 	/** Surface material at the hit point. */
 	Material material();
@@ -20,15 +23,18 @@ public interface Hit {
 	Vector uv();
 	
 	/** The normalized normal at the point of the hit */
-	default Vec3 n_() {
-		return n().normalized_();
+	default Vec3 n_() {return n().normalized_();}
+
+	/** The normalized tangent at the point of the hit */
+	default Vec3 tangent_() {
+		return tangent().normalized_();
 	}
-	
 	
 	default Hit withN(Vec3 n) {
 		return new Hit() {
 			@Override public double   t       () { return Hit.this.t(); }
 			@Override public Vec3     n       () { return n; }
+			@Override public Vec3     tangent () { return null; } // TODO: Change from null
 			@Override public Material material() { return Hit.this.material(); }
 			@Override public Vector   uv      () { return Hit.this.uv(); }
 		};
@@ -39,6 +45,7 @@ public interface Hit {
 			@Override public double   t       () { return Hit.this.t (); }
 			@Override public Vec3     n       () { return Hit.this.n ().inverse(); }
 			@Override public Vec3     n_      () { return Hit.this.n_().inverse(); }
+			@Override public Vec3     tangent () { return Hit.this.tangent(); }
 			@Override public Vector   uv      () { return Hit.this.uv(); }
 			@Override public Material material() { return Hit.this.material(); }
 		};
@@ -75,6 +82,7 @@ public interface Hit {
 		
 		@Override public double   t       () { return t; }
 		@Override public Vec3     n       () { return n; }
+		@Override public Vec3     tangent () { return null; } // TODO: Change from null
 		@Override public Vector   uv      () { return Vector.ZERO; }
 		@Override public Material material() { return Material.BLACK; }
 		
