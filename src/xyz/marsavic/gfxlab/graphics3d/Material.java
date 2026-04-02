@@ -3,6 +3,7 @@ package xyz.marsavic.gfxlab.graphics3d;
 import xyz.marsavic.functions.F1;
 import xyz.marsavic.geometry.Vector;
 import xyz.marsavic.gfxlab.Color;
+import xyz.marsavic.gfxlab.Vec3;
 
 
 public record Material (
@@ -14,7 +15,9 @@ public record Material (
 		double refractiveIndex,
 		
 		Color emittance,
-		BSDF bsdf
+		BSDF bsdf,
+
+		F1<Vec3, Vector> normalMap
 ) implements F1<Material, Vector> {
 	
 	public Material diffuse        (Color  diffuse        ) { return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance); }
@@ -41,13 +44,14 @@ public record Material (
 								reflective.luminance(),
 								refractive.luminance(),
 						}
-				)
+				),
+				null
 		);
 	}
 	
 	
 	public Material(BSDF bsdf) {
-		this(Color.BLACK, Color.BLACK, 32.0, Color.BLACK, Color.BLACK, 1.4, Color.BLACK, bsdf);
+		this(Color.BLACK, Color.BLACK, 32.0, Color.BLACK, Color.BLACK, 1.4, Color.BLACK, bsdf, null);
 	}
 	
 	
@@ -94,7 +98,8 @@ public record Material (
 				refractive     .mul(k),
 				refractiveIndex   * k ,
 				emittance      .mul(k),
-				bsdf           .mul(k)
+				bsdf           .mul(k),
+				null
 		);
 	}
 	
@@ -107,13 +112,17 @@ public record Material (
 				refractive     .add(o.refractive     ),
 				refractiveIndex   + o.refractiveIndex ,
 				emittance      .add(o.emittance      ),
-				BSDF.importanceAverage(new BSDF[] {this.bsdf, o.bsdf}, new double[] {1, 1})
+				BSDF.importanceAverage(new BSDF[] {this.bsdf, o.bsdf}, new double[] {1, 1}),
+				null
 		);
 	}
 	
 	public static Material lerp(Material a, Material b, double k) {
 		return a.mul(1-k).add(b.mul(k));
 	}
-	
-	
+
+	public Material normalMap(F1<Vec3, Vector> normalMap) {
+		return new Material(diffuse, specular, shininess, reflective,
+				refractive, refractiveIndex, emittance, bsdf, normalMap);
+	}
 }
