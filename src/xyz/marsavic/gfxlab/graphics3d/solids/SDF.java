@@ -45,6 +45,7 @@ public interface SDF extends Solid {
 		private final double t;
 		private final SDF sdf;
 		private final Vec3 p;
+		private Vec3 cachedN = null;
 		
 		HitSDF(double t, SDF sdf, Vec3 p) {
 			this.t = t;
@@ -61,15 +62,18 @@ public interface SDF extends Solid {
 		private static final Vec3 EPSILON_X = Vec3.EX.mul(EPSILON);
 		private static final Vec3 EPSILON_Y = Vec3.EY.mul(EPSILON);
 		private static final Vec3 EPSILON_Z = Vec3.EZ.mul(EPSILON);
-		
+
 		@Override
 		public Vec3 n() {
-			double dp = sdf.dist(p);
-			return Vec3.xyz(
-					sdf.dist(p.add(EPSILON_X)) - dp,
-					sdf.dist(p.add(EPSILON_Y)) - dp,
-					sdf.dist(p.add(EPSILON_Z)) - dp
-			);
+			if (cachedN == null) {
+				double dp = sdf.dist(p);
+				cachedN = Vec3.xyz(
+						sdf.dist(p.add(EPSILON_X)) - dp,
+						sdf.dist(p.add(EPSILON_Y)) - dp,
+						sdf.dist(p.add(EPSILON_Z)) - dp
+				);
+			}
+			return cachedN;
 		}
 		
 		static final Material MATERIAL = Material.matte(Color.hsb(0.6, 0.5, 1.0)).specular(Color.WHITE);
@@ -81,6 +85,13 @@ public interface SDF extends Solid {
 		@Override
 		public Vector uv() {
 			return Vector.ZERO;
+		}
+
+		@Override
+		public Vec3 tangent() {
+			Vec3 n = n_();
+			Vec3 helper = Math.abs(n.x()) < 0.9 ? Vec3.EX : Vec3.EY;
+			return helper.sub(n.mul(n.dot(helper))).normalized_();
 		}
 	}
 	

@@ -100,6 +100,12 @@ public class Cylinder implements Solid {
 					-2 * Numeric.asinT(n.y() / r) + 0.5
 			);
 		}
+
+		@Override
+		public Vec3 tangent() {
+			Vec3 n = n();
+			return Vec3.xyz(-n.z(), 0, n.x()).normalized_();
+		}
 		
 		@Override
 		public Vec3 n_() {

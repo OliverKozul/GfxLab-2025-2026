@@ -24,6 +24,7 @@ public class GfxLab {
 //				Mirrors
 //				RefractionTest
 //				TransformationsTest
+				NormalMapTest
 //				CSGTest
 //				GoldTrinket
 //				NewYearsParty
@@ -33,7 +34,7 @@ public class GfxLab {
 //				Oranges2
 //				CityOfNight
 		
-				SDFTest
+//				SDFTest
 		.setup();
 	}
 	

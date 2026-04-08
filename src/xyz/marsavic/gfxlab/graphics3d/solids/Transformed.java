@@ -7,26 +7,25 @@ import xyz.marsavic.gfxlab.graphics3d.Ray;
 import xyz.marsavic.gfxlab.graphics3d.Solid;
 
 public class Transformed implements Solid {
-	
+
 	private final Solid solid;
-	private final Affine3 tInv, tInvT;
-	
-	
+	private final Affine3 t, tInv, tInvT;
+
 	public Transformed(Solid solid, Affine3 t) {
 		this.solid = solid;
-		
-		tInv = t.inverse();
+		this.t     = t;
+		tInv  = t.inverse();
 		tInvT = tInv.transpose();
 	}
-	
+
 	@Override
 	public Hit firstHit(Ray ray, double afterTime) {
-		Ray rayO = ray.transformed(tInv);
-		Hit hitO = solid.firstHit(rayO, afterTime);
-		Vec3 n = tInvT.at(hitO.n());
-		return hitO.withN(n);
+		Ray rayO     = ray.transformed(tInv);
+		Hit hitO     = solid.firstHit(rayO, afterTime);
+		Vec3 n       = tInvT.at(hitO.n());
+		Vec3 tangent = t.at(hitO.tangent());
+		return hitO.withN(n, tangent);
 	}
-	
 	
 	@Override
 	public boolean hitBetween(Ray ray, double afterTime, double beforeTime) {

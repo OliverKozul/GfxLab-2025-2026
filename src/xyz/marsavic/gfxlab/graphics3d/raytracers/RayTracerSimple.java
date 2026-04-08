@@ -32,12 +32,25 @@ public class RayTracerSimple extends RayTracer {
 		if (hit.t() == Double.POSITIVE_INFINITY) {
 			return scene.colorBackground();
 		}
-		
+
+		Material material = hit.material();
 		Vec3 p = ray.at(hit.t());                        // The hit point
 		Vec3 n_ = hit.n_();                              // Normalized normal to the body surface at the hit point
+
+		if (material.normalMap() != null) {
+			Vec3 tangent = hit.tangent();
+			if (tangent != null && tangent.lengthSquared() > 1e-10) {
+				Vec3 bitangent  = n_.cross(tangent);
+				Vec3 texNormal  = material.normalMap().at(hit.uv());
+				n_ = tangent    .mul(texNormal.x())
+						.add(bitangent .mul(texNormal.y()))
+						.add(n_        .mul(texNormal.z()))
+						.normalized_();
+			}
+		}
+
 		Vec3 i_ = ray.d().inverse().normalized_();       // Incoming direction
 		Vec3 r_ = GeometryUtils.reflectedN(n_, i_);      // Reflected ray (i_ reflected over n_)
-		Material material = hit.material();
 		
 		Color lightDiffuse  = Color.BLACK;               // The sum of diffuse contributions from all the lights
 		Color lightSpecular = Color.BLACK;               // The sum of specular contributions from all the lights

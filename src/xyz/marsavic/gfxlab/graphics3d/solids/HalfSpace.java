@@ -155,6 +155,11 @@ public class HalfSpace implements Solid {
 					(b_f - b_e * e_f) / sinSqr
 			);
 		}
+
+		@Override
+		public Vec3 tangent() {
+			return e.normalized_();
+		}
 	}
 	
 	

@@ -30,11 +30,11 @@ public interface Hit {
 		return tangent().normalized_();
 	}
 	
-	default Hit withN(Vec3 n) {
+	default Hit withN(Vec3 n, Vec3 tangent) {
 		return new Hit() {
 			@Override public double   t       () { return Hit.this.t(); }
 			@Override public Vec3     n       () { return n; }
-			@Override public Vec3     tangent () { return null; } // TODO: Change from null
+			@Override public Vec3     tangent () { return tangent; }
 			@Override public Material material() { return Hit.this.material(); }
 			@Override public Vector   uv      () { return Hit.this.uv(); }
 		};
@@ -82,7 +82,7 @@ public interface Hit {
 		
 		@Override public double   t       () { return t; }
 		@Override public Vec3     n       () { return n; }
-		@Override public Vec3     tangent () { return null; } // TODO: Change from null
+		@Override public Vec3     tangent () { return Vec3.EX; }
 		@Override public Vector   uv      () { return Vector.ZERO; }
 		@Override public Material material() { return Material.BLACK; }
 		

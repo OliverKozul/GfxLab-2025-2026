@@ -83,11 +83,18 @@ public class Box implements Solid, Iterable<Vec3> {
 		
 		double max0 = t0.get(iMax0);
 		double min1 = t1.get(iMin1);
-		
+
 		if (max0 < min1) {
-			// TODO Test performance if we change to lazy n computation storing only i in HitBox.
-			if (max0 > afterTime) return new HitBox(max0, Vec3.E[iMax0].mul(-Numeric.sign(ray.d().get(iMax0))));
-			if (min1 > afterTime) return new HitBox(min1, Vec3.E[iMin1].mul( Numeric.sign(ray.d().get(iMin1))));
+			if (max0 > afterTime) {
+				Vec3 n_ = Vec3.E[iMax0].mul(-Numeric.sign(ray.d().get(iMax0)));
+				Vec3 p_ = ray.at(max0).sub(p());
+				return new HitBox(max0, n_, p_);
+			}
+			if (min1 > afterTime) {
+				Vec3 n_ = Vec3.E[iMin1].mul(Numeric.sign(ray.d().get(iMin1)));
+				Vec3 p_ = ray.at(min1).sub(p());
+				return new HitBox(min1, n_, p_);
+			}
 		}
 		return Hit.AtInfinity.axisAlignedGoingIn(ray.d());
 	}
@@ -170,37 +177,51 @@ public class Box implements Solid, Iterable<Vec3> {
 			return pos;
 		}
 	}
-	
-	
+
+
 	final class HitBox implements Hit {
 		private final double t;
 		private final Vec3 n_;
-		
-		
-		HitBox(double t, Vec3 n_) {
+		private final Vec3 tangent_;
+		private final Vec3 p_;
+
+		HitBox(double t, Vec3 n_, Vec3 p_) {
 			this.t = t;
 			this.n_ = n_;
+			this.p_ = p_;
+			this.tangent_ = buildTangent(n_);
 		}
-		
-		@Override public double t() { return t; }
-		@Override public Vec3 n_() { return n_; }
-		@Override public Vec3 n() { return n_; }
-		
+
+		private static Vec3 buildTangent(Vec3 n) {
+			if (Math.abs(n.x()) > 0.5) return Vec3.EX;
+			if (Math.abs(n.y()) > 0.5) return Vec3.EZ;
+			return Vec3.EX;
+		}
+
+		@Override public double t()        { return t; }
+		@Override public Vec3   n_()       { return n_; }
+		@Override public Vec3   n()        { return n_; }
+		@Override public Vec3   tangent()  { return tangent_; }
+
 		@Override
 		public Material material() {
 			return Box.this.mapMaterial.at(uv());
 		}
-		
+
 		@Override
 		public Vector uv() {
-			return Vector.ZERO; // TODO
+			Vec3 size = q().sub(p());
+			Vec3 bitangent = n_.cross(tangent_);
+			return Vector.xy(
+				p_.dot(tangent_)  / size.dot(tangent_.abs()),
+				p_.dot(bitangent) / size.dot(bitangent.abs())
+			);
 		}
 		
 		@Override
 		public Hit inverted() {
-			return new HitBox(t, n_.inverse());
+			return new HitBox(t, n_.inverse(), p_);
 		}
-		
 	}
 	
 }

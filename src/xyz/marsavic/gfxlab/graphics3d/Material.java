@@ -99,7 +99,7 @@ public record Material (
 				refractiveIndex   * k ,
 				emittance      .mul(k),
 				bsdf           .mul(k),
-				null
+				normalMap
 		);
 	}
 	
@@ -113,7 +113,7 @@ public record Material (
 				refractiveIndex   + o.refractiveIndex ,
 				emittance      .add(o.emittance      ),
 				BSDF.importanceAverage(new BSDF[] {this.bsdf, o.bsdf}, new double[] {1, 1}),
-				null
+				normalMap
 		);
 	}
 	
