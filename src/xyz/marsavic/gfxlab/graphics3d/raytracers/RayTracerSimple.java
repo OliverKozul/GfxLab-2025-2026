@@ -39,13 +39,13 @@ public class RayTracerSimple extends RayTracer {
 
 		if (material.normalMap() != null) {
 			Vec3 tangent = hit.tangent();
-			if (tangent != null && tangent.lengthSquared() > 1e-10) {
+			if (tangent != null && tangent.lengthSquared() > EPSILON) {
 				Vec3 bitangent  = n_.cross(tangent);
 				Vec3 texNormal  = material.normalMap().at(hit.uv());
-				n_ = tangent    .mul(texNormal.x())
-						.add(bitangent .mul(texNormal.y()))
-						.add(n_        .mul(texNormal.z()))
-						.normalized_();
+				n_ = tangent   		.mul(texNormal.x())
+					.add(bitangent  .mul(texNormal.y()))
+					.add(n_         .mul(texNormal.z()))
+					.normalized_();
 			}
 		}
 

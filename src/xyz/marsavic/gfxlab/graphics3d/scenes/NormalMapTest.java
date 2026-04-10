@@ -8,6 +8,7 @@ import xyz.marsavic.gfxlab.graphics3d.cameras.Perspective;
 import xyz.marsavic.gfxlab.graphics3d.cameras.TransformedCamera;
 import xyz.marsavic.gfxlab.graphics3d.raytracers.RayTracerSimple;
 import xyz.marsavic.gfxlab.graphics3d.solids.Ball;
+import xyz.marsavic.gfxlab.graphics3d.solids.Box;
 import xyz.marsavic.gfxlab.graphics3d.solids.Group;
 import xyz.marsavic.gfxlab.graphics3d.solids.HalfSpace;
 import xyz.marsavic.gfxlab.graphics3d.textures.Grid;
@@ -47,10 +48,9 @@ public record NormalMapTest(
                     HalfSpace.pn(Vec3.xyz(0, 1, 0), Vec3.xyz(0, -1, 0), materialUVWalls),
                     HalfSpace.pn(Vec3.xyz(0, 0, 1), Vec3.xyz(0, 0, -1), materialUVWalls),
 
-                    Ball.cr(Vec3.xyz(0, 0, 0), 0.5,
-                            Material.matte(Color.gray(0.8))
-                                    .normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap.png"))
-                    )
+                    Box.$.pd(Vec3.xyz(0, 0, 0), Vec3.xyz(1, 1, 1)).material(Material.matte(Color.gray(0.8))
+							.normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap.png")))
+
 							.transformed(Affine3.chain(
                             Affine3.scaling(Vec3.xyz(k, 1.0, 1.0)),
                             Affine3.rotationAboutY(phiY),
@@ -61,7 +61,7 @@ public record NormalMapTest(
             throw new RuntimeException(e);
         }
     }
-	
+
 	@Override
 	public Collection<Light> lights() {
 		return List.of(

@@ -193,8 +193,8 @@ public class Box implements Solid, Iterable<Vec3> {
 		}
 
 		private static Vec3 buildTangent(Vec3 n) {
-			if (Math.abs(n.x()) > 0.5) return Vec3.EX;
-			if (Math.abs(n.y()) > 0.5) return Vec3.EZ;
+			if (Math.abs(n.x()) > 0.5) return Vec3.EY;
+			if (Math.abs(n.y()) > 0.5) return Vec3.EX;
 			return Vec3.EX;
 		}
 
