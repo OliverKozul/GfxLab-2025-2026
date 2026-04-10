@@ -1,0 +1,118 @@
+package xyz.marsavic.gfxlab.graphics3d.scenes;
+
+import xyz.marsavic.gfxlab.*;
+import xyz.marsavic.gfxlab.aggregation.AggregatorFrameLast;
+import xyz.marsavic.gfxlab.aggregation.EAggregator;
+import xyz.marsavic.gfxlab.graphics3d.*;
+import xyz.marsavic.gfxlab.graphics3d.cameras.Perspective;
+import xyz.marsavic.gfxlab.graphics3d.cameras.TransformedCamera;
+import xyz.marsavic.gfxlab.graphics3d.raytracers.RayTracerSimple;
+import xyz.marsavic.gfxlab.graphics3d.solids.Box;
+import xyz.marsavic.gfxlab.graphics3d.solids.Group;
+import xyz.marsavic.gfxlab.graphics3d.solids.HalfSpace;
+import xyz.marsavic.gfxlab.graphics3d.textures.Grid;
+import xyz.marsavic.gfxlab.graphics3d.textures.NormalMapTexture;
+import xyz.marsavic.gfxlab.tonemapping.ToneMapping2;
+import xyz.marsavic.gfxlab.tonemapping.ToneMapping3;
+import xyz.marsavic.gfxlab.tonemapping.matrixcolor_to_colortransforms.AutoSoft;
+import xyz.marsavic.reactions.elements.ElementF;
+import xyz.marsavic.utils.Hash;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+
+import static xyz.marsavic.gfxlab.Vec3.xyz;
+import static xyz.marsavic.reactions.elements.Elements.e;
+
+
+public record NormalMapPaintTest(
+		double k,
+		double phiX,
+		double phiY,
+		NormalMapTexture normalMap,
+		Camera camera
+) implements FFSceneT {
+	
+	@Override
+	public Solid solid() {
+		var materialUVWalls = Grid.standardQuarter(Color.WHITE);
+		var materialUVWallsL = Grid.standardQuarter(Color.hsb(0.00, 0.5, 1.0));
+		var materialUVWallsR = Grid.standardQuarter(Color.hsb(0.33, 0.5, 1.0));
+
+        return Group.of(
+                HalfSpace.pn(Vec3.xyz(-1, 0, 0), Vec3.xyz(1, 0, 0), materialUVWallsL),
+                HalfSpace.pn(Vec3.xyz(1, 0, 0), Vec3.xyz(-1, 0, 0), materialUVWallsR),
+                HalfSpace.pn(Vec3.xyz(0, -1, 0), Vec3.xyz(0, 1, 0), materialUVWalls),
+                HalfSpace.pn(Vec3.xyz(0, 1, 0), Vec3.xyz(0, -1, 0), materialUVWalls),
+                HalfSpace.pn(Vec3.xyz(0, 0, 1), Vec3.xyz(0, 0, -1), materialUVWalls),
+
+                Box.$.pd(Vec3.xyz(0, 0, 0), Vec3.xyz(1, 1, 1)).material(Material.matte(Color.gray(0.8)).normalMap(normalMap))
+
+                        .transformed(Affine3.chain(
+                        Affine3.scaling(Vec3.xyz(k, 1.0, 1.0)),
+                        Affine3.rotationAboutY(phiY),
+                        Affine3.rotationAboutX(phiX)
+                ))
+        );
+    }
+
+	@Override
+	public Collection<Light> lights() {
+		return List.of(
+				Light.pc(Vec3.xyz(-0.7, 0.7, -0.7), Color.WHITE),
+				Light.pc(Vec3.xyz(-0.7, 0.7,  0.7), Color.WHITE),
+				Light.pc(Vec3.xyz( 0.7, 0.7, -0.7), Color.WHITE),
+				Light.pc(Vec3.xyz( 0.7, 0.7,  0.7), Color.WHITE)
+		);
+	}
+	
+	
+	// ================================================================================================================
+
+	
+	public static ElementF<Animation> setup() {
+		var normalMap = e(() -> {
+//            try {
+//                return NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap.png");
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+            return NormalMapTexture.empty(512, 512);
+        });
+		var brushSize = e(25.0);
+
+		var editor = new ElementNormalMapEditor(normalMap, brushSize);
+
+		return
+				e(ToneMapping3.class,
+						new EAggregator(
+								e(AggregatorFrameLast::new),
+//								e(AggregatorOnDemand::new), // faster but not antialiased 
+								e(RayTracerSimple.class,
+									e(NormalMapPaintTest.class
+											, e(0.5)
+											, e(0.0)
+											, e(0.0)
+											, editor
+											, e(TransformedCamera.class
+												, e(Perspective.class, e(1/3.0))
+												, e(Affine3::isometry, e(0.0), e(0.0), e(0.0), e(0.0), e(0.0), e(-4.0))
+											)
+									),
+									e(16)
+								),
+								e(TransformationFromSize.ToGeometricT0_.class),
+								e(xyz(1, 640, 640)),
+								e(true),								
+								e(false),								
+								e(Hash.class, e(0x8EE6B0C4E02CA7B2L))
+						),
+						e(ToneMapping2.class,
+								e(AutoSoft.class, e(0x1p-4), e(1.0))
+						)
+				);
+	}
+
+
+}

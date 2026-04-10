@@ -10,6 +10,7 @@ import javafx.scene.shape.Rectangle;
 import xyz.marsavic.geometry.Box;
 import xyz.marsavic.geometry.Vector;
 import xyz.marsavic.gfxlab.ElementAnimationSink;
+import xyz.marsavic.gfxlab.ElementNormalMapEditor;
 import xyz.marsavic.javafx.UtilsFX;
 import xyz.marsavic.reactions.elements.*;
 
@@ -69,6 +70,7 @@ public class Graph extends Pane {
 	
 	private Vertex createVertexByType(Element e) {
 //		if (e instanceof ElementAnimationSink   e_) return new Vertex_AnimationSinkImage (e_);
+		if (e instanceof ElementNormalMapEditor e_) return new Vertex_NormalMapEditor(e_);
 		if (e instanceof ElementAnimationSink   e_) return new Vertex_AnimationSink      (e_);
 		if (e instanceof ElementDouble          e_) return new Vertex_Double             (e_);
 		if (e instanceof ElementInteger         e_) return new Vertex_Integer            (e_);
