@@ -41,6 +41,11 @@ public record NormalMapTest(
 		var materialUVWallsR = Grid.standardQuarter(Color.hsb(0.33, 0.5, 1.0));
 
         try {
+			var normalMaterial1 = Material.matte(Color.gray(0.8))
+					.normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap.png"));
+			var normalMaterial2 = Material.matte(Color.gray(0.8))
+					.normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap2.png"));
+			var normalMaterial3 = normalMaterial1.add(normalMaterial2);
             return Group.of(
                     HalfSpace.pn(Vec3.xyz(-1, 0, 0), Vec3.xyz(1, 0, 0), materialUVWallsL),
                     HalfSpace.pn(Vec3.xyz(1, 0, 0), Vec3.xyz(-1, 0, 0), materialUVWallsR),
@@ -48,8 +53,7 @@ public record NormalMapTest(
                     HalfSpace.pn(Vec3.xyz(0, 1, 0), Vec3.xyz(0, -1, 0), materialUVWalls),
                     HalfSpace.pn(Vec3.xyz(0, 0, 1), Vec3.xyz(0, 0, -1), materialUVWalls),
 
-                    Box.$.pd(Vec3.xyz(0, 0, 0), Vec3.xyz(1, 1, 1)).material(Material.matte(Color.gray(0.8))
-							.normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap.png")))
+                    Box.$.pd(Vec3.xyz(0, 0, 0), Vec3.xyz(1, 1, 1)).material(normalMaterial3)
 
 							.transformed(Affine3.chain(
                             Affine3.scaling(Vec3.xyz(k, 1.0, 1.0)),

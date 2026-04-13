@@ -37,7 +37,7 @@ public class RayTracerSimple extends RayTracer {
 		Vec3 p = ray.at(hit.t());                        // The hit point
 		Vec3 n_ = hit.n_();                              // Normalized normal to the body surface at the hit point
 
-		if (material.normalMap() != null) {
+		if (material.normalMap() != null) {				 // Calculate new normal using normal map (if it exists)
 			Vec3 tangent = hit.tangent();
 			if (tangent != null && tangent.lengthSquared() > EPSILON) {
 				Vec3 bitangent  = n_.cross(tangent);

@@ -20,18 +20,18 @@ public record Material (
 		F1<Vec3, Vector> normalMap
 ) implements F1<Material, Vector> {
 	
-	public Material diffuse        (Color  diffuse        ) { return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance); }
-	public Material specular       (Color  specular       ) { return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance); }
-	public Material shininess      (double shininess      ) { return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance); }
-	public Material reflective     (Color  reflective     ) { return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance); }
-	public Material refractive     (Color  refractive     ) { return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance); }
-	public Material refractiveIndex(double refractiveIndex) { return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance); }
-	public Material emittance      (Color  emittance      ) { return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance); }
-	
+	public Material diffuse        (Color  diffuse        ) 	{ return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance, normalMap); }
+	public Material specular       (Color  specular       ) 	{ return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance, normalMap); }
+	public Material shininess      (double shininess      ) 	{ return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance, normalMap); }
+	public Material reflective     (Color  reflective     ) 	{ return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance, normalMap); }
+	public Material refractive     (Color  refractive     ) 	{ return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance, normalMap); }
+	public Material refractiveIndex(double refractiveIndex) 	{ return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance, normalMap); }
+	public Material emittance      (Color  emittance      ) 	{ return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance, normalMap); }
+	public Material normalMap	   (F1<Vec3, Vector> normalMap) { return new Material(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance, normalMap); }
 	public Material specularCopyDiffuse() { return this.specular(diffuse()); }
 
 	
-	public Material(Color diffuse, Color specular, double shininess, Color reflective, Color refractive, double refractiveIndex, Color emittance) {
+	public Material(Color diffuse, Color specular, double shininess, Color reflective, Color refractive, double refractiveIndex, Color emittance, F1<Vec3, Vector> normalMap) {
 		this(diffuse, specular, shininess, reflective, refractive, refractiveIndex, emittance,
 				BSDF.importanceAverage(
 						new BSDF[] {
@@ -45,7 +45,7 @@ public record Material (
 								refractive.luminance(),
 						}
 				),
-				null
+				normalMap
 		);
 	}
 	
@@ -63,7 +63,7 @@ public record Material (
 	
 	// --- Utility constants and factory methods ---
 
-	public static final Material BLACK   = new Material(Color.BLACK, Color.BLACK, 32, Color.BLACK, Color.BLACK, 1.5, Color.BLACK);
+	public static final Material BLACK   = new Material(Color.BLACK, Color.BLACK, 32, Color.BLACK, Color.BLACK, 1.5, Color.BLACK, null);
 	
 	public static Material matte (Color  c) { return BLACK.diffuse(c); }
 	public static Material matte (double k) { return matte(Color.gray(k)); }
@@ -113,16 +113,13 @@ public record Material (
 				refractiveIndex   + o.refractiveIndex ,
 				emittance      .add(o.emittance      ),
 				BSDF.importanceAverage(new BSDF[] {this.bsdf, o.bsdf}, new double[] {1, 1}),
-				normalMap
+				(normalMap == null) ? o.normalMap :	// Currently blends between normal maps, not sure if best approach
+						(o.normalMap == null) ? normalMap :
+								uv -> normalMap.at(uv).add(o.normalMap.at(uv)).normalized_()
 		);
 	}
 	
 	public static Material lerp(Material a, Material b, double k) {
 		return a.mul(1-k).add(b.mul(k));
-	}
-
-	public Material normalMap(F1<Vec3, Vector> normalMap) {
-		return new Material(diffuse, specular, shininess, reflective,
-				refractive, refractiveIndex, emittance, bsdf, normalMap);
 	}
 }
