@@ -33,7 +33,7 @@ public record NormalMapTest(
 		double phiY,
 		Camera camera
 ) implements FFSceneT {
-	
+
 	@Override
 	public Solid solid() {
 		var materialUVWalls = Grid.standardQuarter(Color.WHITE);
@@ -46,20 +46,29 @@ public record NormalMapTest(
 			var normalMaterial2 = Material.matte(Color.gray(0.8))
 					.normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap2.png"));
 			var normalMaterial3 = normalMaterial1.add(normalMaterial2);
+			var normalMaterialEarth = Material.matte(Color.rgb(0.2, 0.4, 0.5))
+					.normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\Earth.png"));
             return Group.of(
-                    HalfSpace.pn(Vec3.xyz(-1, 0, 0), Vec3.xyz(1, 0, 0), materialUVWallsL),
-                    HalfSpace.pn(Vec3.xyz(1, 0, 0), Vec3.xyz(-1, 0, 0), materialUVWallsR),
-                    HalfSpace.pn(Vec3.xyz(0, -1, 0), Vec3.xyz(0, 1, 0), materialUVWalls),
-                    HalfSpace.pn(Vec3.xyz(0, 1, 0), Vec3.xyz(0, -1, 0), materialUVWalls),
-                    HalfSpace.pn(Vec3.xyz(0, 0, 1), Vec3.xyz(0, 0, -1), materialUVWalls),
+                    HalfSpace.pn(Vec3.xyz(-1, 0, 0), Vec3.xyz(2, 0, 0), materialUVWallsL),
+                    HalfSpace.pn(Vec3.xyz(1, 0, 0), Vec3.xyz(-2, 0, 0), materialUVWallsR),
+                    HalfSpace.pn(Vec3.xyz(0, -1, 0), Vec3.xyz(0, 2, 0), materialUVWalls),
+                    HalfSpace.pn(Vec3.xyz(0, 1, 0), Vec3.xyz(0, -2, 0), materialUVWalls),
+                    HalfSpace.pn(Vec3.xyz(0, 0, 1), Vec3.xyz(0, 0, -2), materialUVWalls),
 
-                    Box.$.pd(Vec3.xyz(0, 0, 0), Vec3.xyz(1, 1, 1)).material(normalMaterial3)
+                    Box.$.pd(Vec3.xyz(0.5, 0, 0), Vec3.xyz(1, 1, 1)).material(normalMaterial3)
 
 							.transformed(Affine3.chain(
                             Affine3.scaling(Vec3.xyz(k, 1.0, 1.0)),
                             Affine3.rotationAboutY(phiY),
                             Affine3.rotationAboutX(phiX)
-                    ))
+                    )),
+					Ball.cr(Vec3.xyz(-0.5, 0, 0), 0.5).material(normalMaterialEarth)
+
+							.transformed(Affine3.chain(
+									Affine3.scaling(Vec3.xyz(k, 1.0, 1.0)),
+									Affine3.rotationAboutY(phiY),
+									Affine3.rotationAboutX(phiX)
+							))
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -75,17 +84,17 @@ public record NormalMapTest(
 				Light.pc(Vec3.xyz( 0.7, 0.7,  0.7), Color.WHITE)
 		);
 	}
-	
-	
+
+
 	// ================================================================================================================
 
-	
+
 	public static ElementF<Animation> setup() {
 		return
 				e(ToneMapping3.class,
 						new EAggregator(
 								e(AggregatorFrameLast::new),
-//								e(AggregatorOnDemand::new), // faster but not antialiased 
+//								e(AggregatorOnDemand::new), // faster but not antialiased
 								e(RayTracerSimple.class,
 									e(NormalMapTest.class
 											, e(0.5)
@@ -100,8 +109,8 @@ public record NormalMapTest(
 								),
 								e(TransformationFromSize.ToGeometricT0_.class),
 								e(xyz(1, 640, 640)),
-								e(true),								
-								e(false),								
+								e(true),
+								e(false),
 								e(Hash.class, e(0x8EE6B0C4E02CA7B2L))
 						),
 						e(ToneMapping2.class,
@@ -109,6 +118,6 @@ public record NormalMapTest(
 						)
 				);
 	}
-	
-	
+
+
 }

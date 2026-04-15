@@ -73,12 +73,12 @@ public record NormalMapPaintTest(
 	
 	public static ElementF<Animation> setup() {
 		var normalMap = e(() -> {
-//            try {
-//                return NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap.png");
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-            return NormalMapTexture.empty(512, 512);
+            try {
+                return NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap.png");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+//            return NormalMapTexture.empty(512, 512);
         });
 		var brushSize = e(25.0);
 
