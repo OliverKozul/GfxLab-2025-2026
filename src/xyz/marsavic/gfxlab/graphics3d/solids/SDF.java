@@ -91,7 +91,7 @@ public interface SDF extends Solid {
 		public Vec3 tangent() {
 			Vec3 n = n_();
 			Vec3 helper = Math.abs(n.x()) < 0.9 ? Vec3.EX : Vec3.EY;
-			return helper.sub(n.mul(n.dot(helper))).normalized_();
+			return helper.sub(n.mul(n.dot(helper)));
 		}
 	}
 	

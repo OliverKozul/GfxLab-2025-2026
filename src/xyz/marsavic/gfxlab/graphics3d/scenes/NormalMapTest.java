@@ -42,12 +42,12 @@ public record NormalMapTest(
 
         try {
 			var normalMaterial1 = Material.matte(Color.gray(0.8))
-					.normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap.png"));
+					.normalMap(NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/NormalMap.png"));
 			var normalMaterial2 = Material.matte(Color.gray(0.8))
-					.normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap2.png"));
+					.normalMap(NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/NormalMap2.png"));
 			var normalMaterial3 = normalMaterial1.add(normalMaterial2);
 			var normalMaterialEarth = Material.matte(Color.rgb(0.2, 0.4, 0.5))
-					.normalMap(NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\Earth.png"));
+					.normalMap(NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/Earth.png"));
             return Group.of(
                     HalfSpace.pn(Vec3.xyz(-1, 0, 0), Vec3.xyz(2, 0, 0), materialUVWallsL),
                     HalfSpace.pn(Vec3.xyz(1, 0, 0), Vec3.xyz(-2, 0, 0), materialUVWallsR),

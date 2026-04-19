@@ -158,7 +158,7 @@ public class HalfSpace implements Solid {
 
 		@Override
 		public Vec3 tangent() {
-			return e.normalized_();
+			return e;
 		}
 	}
 	

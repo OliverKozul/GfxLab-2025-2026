@@ -95,7 +95,7 @@ public class Ball implements Solid {
 		@Override
 		public Vec3 tangent() {
 			Vec3 n = n();
-			return Vec3.xyz(-n.z(), 0, n.x()).normalized_();
+			return Vec3.xyz(-n.z(), 0, n.x());
 		}
 		
 		@Override
