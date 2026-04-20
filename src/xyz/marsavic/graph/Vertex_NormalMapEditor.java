@@ -32,6 +32,8 @@ public class Vertex_NormalMapEditor extends VBox implements Vertex {
 	public final List<VertexOutputJack> outputJacks;
 
 	private NormalMapTexture normalMap;
+	private final int imageW;
+	private final int imageH;
 	private final Canvas canvas = new Canvas(SIZE, SIZE);
 
 	final A1<EventInvalidated> onInvalidated = this::invalidated;
@@ -58,6 +60,10 @@ public class Vertex_NormalMapEditor extends VBox implements Vertex {
 		outputJacks = List.of(jackOut);
 
 		element.in0.output().onInvalidated().add(onInvalidated);
+		normalMap = element.in0.get();
+		imageW = normalMap.image().getWidth();
+		imageH = normalMap.image().getHeight();
+
 		invalidated(null);
 	}
 
@@ -83,39 +89,63 @@ public class Vertex_NormalMapEditor extends VBox implements Vertex {
 		BufferedImage image = normalMap.image();
 		int r = (int) Math.ceil(radius);
 
+		float targetR = 0.5f;
+		float targetG = 0.5f;
+		float targetB = indent ? 0.0f : 1.0f;
+
 		for (int dx = -r; dx <= r; dx++) {
 			for (int dy = -r; dy <= r; dy++) {
 				double dist = Math.sqrt(dx * dx + dy * dy);
 				if (dist > radius) continue;
 
-				int x = Math.floorMod(cx + dx, image.getWidth());
-				int y = Math.floorMod(cy + dy, image.getHeight());
+				int x = Math.floorMod(cx + dx, imageW);
+				int y = Math.floorMod(cy + dy, imageH);
 
 				double ratio = 1.0 - (dist / radius);
-				double strength = ratio * ratio * 0.025f;
+				float strength = (float)(ratio * ratio * 0.2);
 
 				int rgb = image.getRGB(x, y);
-				int red   = (rgb >> 16) & 0xFF;
-				int green = (rgb >>  8) & 0xFF;
-				int blue  =  rgb        & 0xFF;
+				float r_ = ((rgb >> 16) & 0xFF) / 255.0f;
+				float g_ = ((rgb >>  8) & 0xFF) / 255.0f;
+				float b_ = ( rgb        & 0xFF) / 255.0f;
 
-				float b = blue / 255.0f;
+				r_ = r_ + (targetR - r_) * strength;
+				g_ = g_ + (targetG - g_) * strength;
+				b_ = b_ + (targetB - b_) * strength;
 
-				if (indent) {
-					b -= (float)(strength);
-				} else {
-					b += (float)(strength);
-				}
-
-				int newB = (int) (Math.clamp(b, 0.0f, 1.0f) * 255);
-				int newRgb = (red << 16) | (green << 8) | newB;
+				int newRgb = ((int)(r_ * 255) << 16) | ((int)(g_ * 255) << 8) | (int)(b_ * 255);
 				image.setRGB(x, y, newRgb);
 			}
 		}
 	}
 
 	private void redraw() {
-		WritableImage fxImg = SwingFXUtils.toFXImage(normalMap.image(), null);
+		BufferedImage image = normalMap.image();
+		BufferedImage res = new BufferedImage(imageW, imageH, BufferedImage.TYPE_INT_RGB);
+
+		float lx = -0.5f, ly = -0.5f, lz = 1.0f;
+		float lLen = (float) Math.sqrt(lx*lx + ly*ly + lz*lz);
+		lx /= lLen; ly /= lLen; lz /= lLen;
+
+		for (int y = 0; y < imageH; y++) {
+			for (int x = 0; x < imageW; x++) {
+				int rgb = image.getRGB(x, y);
+				float r = ((rgb >> 16) & 0xFF) / 255.0f;
+				float g = ((rgb >>  8) & 0xFF) / 255.0f;
+				float b = ( rgb        & 0xFF) / 255.0f;
+
+				float nx = r * 2.0f - 1.0f;
+				float ny = g * 2.0f - 1.0f;
+				float nz = b * 2.0f - 1.0f;
+
+				float diff = Math.max(0, nx * lx + ny * ly + nz * lz);
+				int shade = (int)(diff * 255);
+
+				res.setRGB(x, y, (shade << 16) | (shade << 8) | shade);
+			}
+		}
+
+		WritableImage fxImg = SwingFXUtils.toFXImage(res, null);
 		canvas.getGraphicsContext2D().drawImage(fxImg, 0, 0, SIZE, SIZE);
 	}
 
