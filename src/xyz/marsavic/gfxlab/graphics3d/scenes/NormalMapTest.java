@@ -55,7 +55,7 @@ public record NormalMapTest(
 	public Solid solid() {
 		try {
 			var normalMapEarth = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/Earth.png");
-			var heightMapEarth = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/EarthHeightMap.jpg");
+			var heightMapEarth = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/height_maps/EarthHeightMap.jpg");
 
 			F1<Material, Vector> earthMaterial = uv -> {
 				Vec3 normal = normalMapEarth.sample(uv);
