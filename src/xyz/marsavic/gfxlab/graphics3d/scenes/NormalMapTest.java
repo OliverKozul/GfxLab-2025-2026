@@ -10,10 +10,6 @@ import xyz.marsavic.gfxlab.graphics3d.cameras.Perspective;
 import xyz.marsavic.gfxlab.graphics3d.cameras.TransformedCamera;
 import xyz.marsavic.gfxlab.graphics3d.raytracers.RayTracerSimple;
 import xyz.marsavic.gfxlab.graphics3d.solids.Ball;
-import xyz.marsavic.gfxlab.graphics3d.solids.Box;
-import xyz.marsavic.gfxlab.graphics3d.solids.Group;
-import xyz.marsavic.gfxlab.graphics3d.solids.HalfSpace;
-import xyz.marsavic.gfxlab.graphics3d.textures.Grid;
 import xyz.marsavic.gfxlab.graphics3d.textures.NormalMapTexture;
 import xyz.marsavic.gfxlab.tonemapping.ToneMapping2;
 import xyz.marsavic.gfxlab.tonemapping.ToneMapping3;
@@ -30,84 +26,92 @@ import static xyz.marsavic.reactions.elements.Elements.e;
 
 
 public record NormalMapTest(
-		double k,
 		double phiX,
 		double phiY,
+		double lightPhiX,
+		double lightPhiY,
+		double deepOceanHeight,
+		double shallowOceanHeight,
+		double coastHeight,
+		double shoreHeight,
+		double plainsHeight,
+		double forestHeight,
+		double mountainHeight,
 		Camera camera
 ) implements FFSceneT {
 
+	private Color heightToColor(float height) {
+		if (height < deepOceanHeight) return Color.rgb(0.02, 0.05, 0.3);   	// deep ocean
+		if (height < shallowOceanHeight) return Color.rgb(0.05, 0.15, 0.5);    // shallow ocean
+		if (height < coastHeight) return Color.rgb(0.1,  0.4,  0.6);   		// coast
+		if (height < shoreHeight) return Color.rgb(0.85, 0.80, 0.55);  		// shore/beach
+		if (height < plainsHeight) return Color.rgb(0.2,  0.55, 0.15);  		// lowland
+		if (height < forestHeight) return Color.rgb(0.15, 0.40, 0.1);   		// forest
+		if (height < mountainHeight) return Color.rgb(0.55, 0.50, 0.45);  		// mountain
+		return Color.rgb(0.95, 0.95, 0.95);                      				// snow peak
+	}
+
 	@Override
 	public Solid solid() {
-		var materialUVWalls  = Grid.standardQuarter(Color.WHITE);
-		var materialUVWallsL = Grid.standardQuarter(Color.hsb(0.00, 0.5, 1.0));
-		var materialUVWallsR = Grid.standardQuarter(Color.hsb(0.33, 0.5, 1.0));
-
-        try {
-			var normalMap1     = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/NormalMap.png");
-			var normalMap2     = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/NormalMap2.png");
+		try {
 			var normalMapEarth = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/Earth.png");
+			var heightMapEarth = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/EarthHeightMap.jpg");
 
-			F1<Material, Vector> normalMaterial      = Material.withNormalMap(Material.matte(Color.gray(0.8))       , normalMap1, normalMap2);
-			F1<Material, Vector> normalMaterialEarth = Material.withNormalMap(Material.matte(Color.rgb(0.2, 0.4, 0.5)), normalMapEarth);
+			F1<Material, Vector> earthMaterial = uv -> {
+				Vec3 normal = normalMapEarth.sample(uv);
+				float height = heightMapEarth.sampleHeight(uv);
+				Color color = heightToColor(height);
+				return Material.matte(color).normalMap(normal);
+			};
 
-            return Group.of(
-                    HalfSpace.pn(Vec3.xyz(-1, 0, 0), Vec3.xyz(2, 0, 0), materialUVWallsL),
-                    HalfSpace.pn(Vec3.xyz(1, 0, 0), Vec3.xyz(-2, 0, 0), materialUVWallsR),
-                    HalfSpace.pn(Vec3.xyz(0, -1, 0), Vec3.xyz(0, 2, 0), materialUVWalls),
-                    HalfSpace.pn(Vec3.xyz(0, 1, 0), Vec3.xyz(0, -2, 0), materialUVWalls),
-                    HalfSpace.pn(Vec3.xyz(0, 0, 1), Vec3.xyz(0, 0, -2), materialUVWalls),
-
-                    Box.$.pd(Vec3.xyz(0.5, 0, 0), Vec3.xyz(1, 1, 1)).material(normalMaterial)
-
-							.transformed(Affine3.chain(
-                            Affine3.scaling(Vec3.xyz(k, 1.0, 1.0)),
-                            Affine3.rotationAboutY(phiY),
-                            Affine3.rotationAboutX(phiX)
-                    )),
-					Ball.cr(Vec3.xyz(-0.5, 0, 0), 0.5).material(normalMaterialEarth)
-
-							.transformed(Affine3.chain(
-									Affine3.scaling(Vec3.xyz(k, 1.0, 1.0)),
-									Affine3.rotationAboutY(phiY),
-									Affine3.rotationAboutX(phiX)
-							))
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+			return Ball.cr(Vec3.xyz(0, 0, 0), 1.0)
+					.material(earthMaterial)
+					.transformed(Affine3.chain(
+							Affine3.rotationAboutY(phiY),
+							Affine3.rotationAboutX(phiX)
+			));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	@Override
 	public Collection<Light> lights() {
+		Vec3 lightPos = Affine3.chain(
+				Affine3.rotationAboutY(lightPhiY),
+				Affine3.rotationAboutX(lightPhiX)
+		).at(Vec3.xyz(0, 0, -4));
+
 		return List.of(
-				Light.pc(Vec3.xyz(-0.7, 0.7, -0.7), Color.WHITE),
-				Light.pc(Vec3.xyz(-0.7, 0.7,  0.7), Color.WHITE),
-				Light.pc(Vec3.xyz( 0.7, 0.7, -0.7), Color.WHITE),
-				Light.pc(Vec3.xyz( 0.7, 0.7,  0.7), Color.WHITE)
+				Light.pc(lightPos, Color.WHITE.mul(3.0)),
+				Light.pc(Vec3.xyz(-3, 0, 3), Color.WHITE.mul(0.3))
 		);
 	}
-
-
-	// ================================================================================================================
-
 
 	public static ElementF<Animation> setup() {
 		return
 				e(ToneMapping3.class,
 						new EAggregator(
 								e(AggregatorFrameLast::new),
-//								e(AggregatorOnDemand::new), // faster but not antialiased
 								e(RayTracerSimple.class,
-									e(NormalMapTest.class
-											, e(0.5)
-											, e(0.0)
-											, e(0.0)
-											, e(TransformedCamera.class
-												, e(Perspective.class, e(1/3.0))
-												, e(Affine3::isometry, e(0.0), e(0.0), e(0.0), e(0.0), e(0.0), e(-4.0))
-											)
-									),
-									e(16)
+										e(NormalMapTest.class
+												, e(0.3)		// phiX
+												, e(0.0)		// phiY
+												, e(0.0)    	// lightPhiX
+												, e(0.0)    	// lightPhiY
+												, e(0.3)		// deep ocean
+												, e(0.45)		// shallow ocean
+												, e(0.50)		// coast
+												, e(0.52)		// shore
+												, e(0.60)		// plains
+												, e(0.70)		// forest
+												, e(0.80)		// mountain
+												, e(TransformedCamera.class
+														, e(Perspective.class, e(1/3.0))
+														, e(Affine3::isometry, e(0.0), e(0.0), e(0.0), e(0.0), e(0.0), e(-3.5))
+												)
+										),
+										e(16)
 								),
 								e(TransformationFromSize.ToGeometricT0_.class),
 								e(xyz(1, 640, 640)),
@@ -120,6 +124,4 @@ public record NormalMapTest(
 						)
 				);
 	}
-
-
 }

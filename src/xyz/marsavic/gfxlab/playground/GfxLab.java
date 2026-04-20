@@ -24,8 +24,8 @@ public class GfxLab {
 //				Mirrors
 //				RefractionTest
 //				TransformationsTest
-//				NormalMapTest
-				NormalMapPaintTest
+				NormalMapTest
+//				NormalMapPaintTest
 //				CSGTest
 //				GoldTrinket
 //				NewYearsParty

@@ -77,8 +77,8 @@ public class Vertex_NormalMapEditor extends VBox implements Vertex {
 		boolean indent = e.getButton() == MouseButton.PRIMARY;
 		double radius = element.inBrushSize.get();
 
-		int px = (int)(e.getX() * normalMap.image().getWidth()  / SIZE);
-		int py = (int)(e.getY() * normalMap.image().getHeight() / SIZE);
+		int px = (int)(e.getX() * imageW  / SIZE);
+		int py = (int)(e.getY() * imageH / SIZE);
 		paintBrush(px, py, radius, indent);
 		element.out.fireInvalidated();
 		redraw();

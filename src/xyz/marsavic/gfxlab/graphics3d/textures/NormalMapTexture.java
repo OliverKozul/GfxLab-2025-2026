@@ -46,4 +46,15 @@ public record NormalMapTexture(BufferedImage image) {
                 b * 2.0 - 1.0
         ).normalized_();
     }
+
+    public float sampleHeight(Vector uv) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+
+        int x = (int) Numeric.mod((int)(uv.x() * w), w);
+        int y = (int) Numeric.mod((int)(uv.y() * h), h);
+
+        int rgb = image.getRGB(x, y);
+        return ((rgb >> 16) & 0xFF) / 255.0f;
+    }
 }

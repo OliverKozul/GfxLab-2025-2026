@@ -77,7 +77,7 @@ public record NormalMapPaintTest(
 	public static ElementF<Animation> setup() {
 		var normalMap = e(() -> {
             try {
-                return NormalMapTexture.fromFile("resources\\xyz\\marsavic\\gfxlab\\resources\\normal_maps\\NormalMap.png");
+                return NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/NormalMap.png");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
