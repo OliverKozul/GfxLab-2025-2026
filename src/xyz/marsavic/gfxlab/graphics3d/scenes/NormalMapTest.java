@@ -1,5 +1,7 @@
 package xyz.marsavic.gfxlab.graphics3d.scenes;
 
+import xyz.marsavic.functions.F1;
+import xyz.marsavic.geometry.Vector;
 import xyz.marsavic.gfxlab.*;
 import xyz.marsavic.gfxlab.aggregation.AggregatorFrameLast;
 import xyz.marsavic.gfxlab.aggregation.EAggregator;
@@ -36,18 +38,18 @@ public record NormalMapTest(
 
 	@Override
 	public Solid solid() {
-		var materialUVWalls = Grid.standardQuarter(Color.WHITE);
+		var materialUVWalls  = Grid.standardQuarter(Color.WHITE);
 		var materialUVWallsL = Grid.standardQuarter(Color.hsb(0.00, 0.5, 1.0));
 		var materialUVWallsR = Grid.standardQuarter(Color.hsb(0.33, 0.5, 1.0));
 
         try {
-			var normalMaterial1 = Material.matte(Color.gray(0.8))
-					.normalMap(NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/NormalMap.png"));
-			var normalMaterial2 = Material.matte(Color.gray(0.8))
-					.normalMap(NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/NormalMap2.png"));
-			var normalMaterial3 = normalMaterial1.add(normalMaterial2);
-			var normalMaterialEarth = Material.matte(Color.rgb(0.2, 0.4, 0.5))
-					.normalMap(NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/Earth.png"));
+			var normalMap1     = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/NormalMap.png");
+			var normalMap2     = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/NormalMap2.png");
+			var normalMapEarth = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/Earth.png");
+
+			F1<Material, Vector> normalMaterial      = Material.withNormalMap(Material.matte(Color.gray(0.8))       , normalMap1, normalMap2);
+			F1<Material, Vector> normalMaterialEarth = Material.withNormalMap(Material.matte(Color.rgb(0.2, 0.4, 0.5)), normalMapEarth);
+
             return Group.of(
                     HalfSpace.pn(Vec3.xyz(-1, 0, 0), Vec3.xyz(2, 0, 0), materialUVWallsL),
                     HalfSpace.pn(Vec3.xyz(1, 0, 0), Vec3.xyz(-2, 0, 0), materialUVWallsR),
@@ -55,7 +57,7 @@ public record NormalMapTest(
                     HalfSpace.pn(Vec3.xyz(0, 1, 0), Vec3.xyz(0, -2, 0), materialUVWalls),
                     HalfSpace.pn(Vec3.xyz(0, 0, 1), Vec3.xyz(0, 0, -2), materialUVWalls),
 
-                    Box.$.pd(Vec3.xyz(0.5, 0, 0), Vec3.xyz(1, 1, 1)).material(normalMaterial3)
+                    Box.$.pd(Vec3.xyz(0.5, 0, 0), Vec3.xyz(1, 1, 1)).material(normalMaterial)
 
 							.transformed(Affine3.chain(
                             Affine3.scaling(Vec3.xyz(k, 1.0, 1.0)),

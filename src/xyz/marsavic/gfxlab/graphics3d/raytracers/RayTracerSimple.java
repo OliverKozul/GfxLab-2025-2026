@@ -41,7 +41,7 @@ public class RayTracerSimple extends RayTracer {
 			Vec3 tangent = hit.tangent();
 			if (tangent != null && tangent.lengthSquared() > EPSILON) {
 				Vec3 bitangent  = n_.cross(tangent);
-				Vec3 texNormal  = material.normalMap().at(hit.uv());
+				Vec3 texNormal  = material.normalMap();
 				n_ = tangent   		.mul(texNormal.x())
 					.add(bitangent  .mul(texNormal.y()))
 					.add(n_         .mul(texNormal.z()))

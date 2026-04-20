@@ -1,6 +1,5 @@
 package xyz.marsavic.gfxlab.graphics3d.textures;
 
-import xyz.marsavic.functions.F1;
 import xyz.marsavic.geometry.Vector;
 import xyz.marsavic.gfxlab.Vec3;
 import xyz.marsavic.utils.Numeric;
@@ -10,7 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public record NormalMapTexture(BufferedImage image) implements F1<Vec3, Vector> {
+public record NormalMapTexture(BufferedImage image) {
 
     public static NormalMapTexture fromFile(String path) throws IOException {
         return new NormalMapTexture(ImageIO.read(new File(path)));
@@ -29,8 +28,7 @@ public record NormalMapTexture(BufferedImage image) implements F1<Vec3, Vector> 
         return new NormalMapTexture(img);
     }
 
-    @Override
-    public Vec3 at(Vector uv) {
+    public Vec3 sample(Vector uv) {
         int w = image.getWidth();
         int h = image.getHeight();
 

@@ -1,5 +1,7 @@
 package xyz.marsavic.gfxlab.graphics3d.scenes;
 
+import xyz.marsavic.functions.F1;
+import xyz.marsavic.geometry.Vector;
 import xyz.marsavic.gfxlab.*;
 import xyz.marsavic.gfxlab.aggregation.AggregatorFrameLast;
 import xyz.marsavic.gfxlab.aggregation.EAggregator;
@@ -39,6 +41,7 @@ public record NormalMapPaintTest(
 		var materialUVWalls = Grid.standardQuarter(Color.WHITE);
 		var materialUVWallsL = Grid.standardQuarter(Color.hsb(0.00, 0.5, 1.0));
 		var materialUVWallsR = Grid.standardQuarter(Color.hsb(0.33, 0.5, 1.0));
+		F1<Material, Vector> normalMaterial     = Material.withNormalMap(Material.matte(Color.gray(0.8)), normalMap);
 
         return Group.of(
                 HalfSpace.pn(Vec3.xyz(-1, 0, 0), Vec3.xyz(1, 0, 0), materialUVWallsL),
@@ -47,7 +50,7 @@ public record NormalMapPaintTest(
                 HalfSpace.pn(Vec3.xyz(0, 1, 0), Vec3.xyz(0, -1, 0), materialUVWalls),
                 HalfSpace.pn(Vec3.xyz(0, 0, 1), Vec3.xyz(0, 0, -1), materialUVWalls),
 
-                Box.$.pd(Vec3.xyz(0, 0, 0), Vec3.xyz(1, 1, 1)).material(Material.matte(Color.gray(0.8)).normalMap(normalMap))
+                Box.$.pd(Vec3.xyz(0, 0, 0), Vec3.xyz(1, 1, 1)).material(normalMaterial)
 
                         .transformed(Affine3.chain(
                         Affine3.scaling(Vec3.xyz(k, 1.0, 1.0)),
