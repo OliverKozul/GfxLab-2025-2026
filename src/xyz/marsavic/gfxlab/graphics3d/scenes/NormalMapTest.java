@@ -55,11 +55,15 @@ public record NormalMapTest(
 	public Solid solid() {
 		try {
 			var normalMapEarth = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/normal_maps/Earth.png");
-			var heightMapEarth = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/height_maps/EarthHeightMap.jpg");
+			var heightMapEarth = NormalMapTexture.fromFile("resources/xyz/marsavic/gfxlab/resources/height_maps/EarthHeightMap2.png");
 
 			F1<Material, Vector> earthMaterial = uv -> {
-				Vec3 normal = normalMapEarth.sample(uv);
-				float height = heightMapEarth.sampleHeight(uv);
+				Vector remappedUv = Vector.xy(
+						uv.x(),
+						0.5 - uv.y() / 2.0
+				);
+				Vec3 normal = normalMapEarth.sample(remappedUv);
+				float height = heightMapEarth.sampleHeight(remappedUv);
 				Color color = heightToColor(height);
 				return Material.matte(color).normalMap(normal);
 			};
@@ -99,13 +103,13 @@ public record NormalMapTest(
 												, e(0.0)		// phiY
 												, e(0.0)    	// lightPhiX
 												, e(0.0)    	// lightPhiY
-												, e(0.3)		// deep ocean
-												, e(0.45)		// shallow ocean
-												, e(0.50)		// coast
-												, e(0.52)		// shore
-												, e(0.60)		// plains
-												, e(0.70)		// forest
-												, e(0.80)		// mountain
+												, e(0.65)		// deep ocean
+												, e(0.70)		// shallow ocean
+												, e(0.72)		// coast
+												, e(0.76)		// shore
+												, e(0.79)		// plains
+												, e(0.90)		// forest
+												, e(0.92)		// mountain
 												, e(TransformedCamera.class
 														, e(Perspective.class, e(1/3.0))
 														, e(Affine3::isometry, e(0.0), e(0.0), e(0.0), e(0.0), e(0.0), e(-3.5))
